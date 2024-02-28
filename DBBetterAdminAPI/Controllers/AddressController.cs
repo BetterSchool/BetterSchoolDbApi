@@ -101,7 +101,7 @@ namespace BetterAdminDbAPI.Controllers
         {
             var entity = new Address()
             {
-                Id = Id
+                Id = id
             };
             dbContext.Addresses.Attach(entity);
             dbContext.Addresses.Remove(entity);
