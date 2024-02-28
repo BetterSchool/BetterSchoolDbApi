@@ -18,11 +18,11 @@ jobs:
       with:
         dotnet-version: 6.0.x
         
-    - name: Restore dependencies DBBetterAdminAPI/BetterAdminDbAPI.sln
+    - name: Restore dependencies ./DBBetterAdminAPI/BetterAdminDbAPI.sln
       run: dotnet restore
       
     - name: Build
-      run: dotnet DBBetterAdminAPI/BetterAdminDbAPI.sln build --no-restore
+      run: dotnet ./DBBetterAdminAPI/BetterAdminDbAPI.sln build --no-restore
       
     - name: Test
-      run: dotnet test BetterAdminDbAPI.Test/BetterAdminDbAPI.Test.csproj --no-build --verbosity normal
+      run: dotnet test ./BetterAdminDbAPI.Test/BetterAdminDbAPI.Test.csproj --no-build --verbosity normal
