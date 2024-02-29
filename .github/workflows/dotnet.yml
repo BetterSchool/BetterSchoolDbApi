@@ -8,7 +8,7 @@ on: [pull_request, push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: [windows-latest]
 
     steps:
     - uses: actions/checkout@v3
@@ -17,9 +17,12 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+
+    - name: Show Dir
+      run: ls
       
     - name: Build
-      run: dotnet ./DBBetterAdminAPI/BetterAdminDbAPI.sln build --no-restore
+      run: dotnet build ./DBBetterAdminAPI/BetterAdminDbAPI.sln
       
     - name: Test
       run: dotnet test ./BetterAdminDbAPI.Test/BetterAdminDbAPI.Test.csproj --no-build --verbosity normal
