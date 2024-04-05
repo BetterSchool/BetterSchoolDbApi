@@ -8,24 +8,36 @@ namespace BetterAdminDbAPI.Controllers
     [Route("api/[controller]")]
     public class AddressController : ControllerBase
     {
-
         [HttpGet("GetAddresses")]
-        public HttpStatusCode Get(HttpRequestMessage request)
+        public HttpStatusCode Get()
         {
             //List<Address> addresses = AddressRepo.GetAll();
-            //return addresses;
+            if (addresses.Count < 0){
+                return NotFound();
+            }
+            else{
+                return addresses;
+            }
         }
 
         [HttpGet("GetAddressById")]
         public Address GetAddressById([FromBody] int id)
         {
-            //AddressRepo.GetById(id);
+            //Address? address = AddressRepo.GetById(id);
+            if (address == null){
+                return NotFound();
+            }
+        
+        return address;
         }
 
         [HttpPost("InsertAddress")]
         public HttpStatusCode InsertAddress([FromBody] Address address)
         {
-            //AddressRepo.Create(address);
+            //var result = AddressRepo.Create(address);
+            //if (result == false){
+            //      return NotFound();
+            //}
             return HttpStatusCode.Created;
         }
 
@@ -42,14 +54,20 @@ namespace BetterAdminDbAPI.Controllers
             entity.Road = address.Road;
             entity.PostalCode = address.PostalCode;
             
-            //AddressRepo.UpdateAddress(entity);
+            //var result = AddressRepo.UpdateAddress(entity);
+            //if (result == false){
+            //      return NotFound();
+            //}
             return HttpStatusCode.OK;
         }
 
         [HttpDelete("DeleteAddress/{Id}")]
         public HttpStatusCode DeleteAddress([FromBody] int id)
         {
-            //AddressRepo.Delete(id);
+            //var result = AddressRepo.Delete(id);
+            //if (result == false){
+            //      return NotFound();
+            //}
             return HttpStatusCode.OK;
         }
     }

@@ -1,7 +1,4 @@
-﻿using BetterAdminDbAPI.DTO;
-using BetterAdminDbAPI.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -12,80 +9,48 @@ namespace BetterAdminDbAPI.Controllers
     [ApiController]
     public class GuardianController : ControllerBase
     {
-        private readonly BetterAdminContext dbContext;
-
-        public GuardianController(BetterAdminContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
-
         // GET: api/<GuardianController>
         [HttpGet("GetGuardians")]
-        public async Task<ActionResult<List<GuardianDTO>>> Get()
+        public Guardian Get()
         {
-            var List = await dbContext.Guardians.Select(
-                guardian => new GuardianDTO
-                {
-                    Id = guardian.Id,
-                    WorkPhoneNo = guardian.WorkPhoneNo,
-                    AddressId = guardian.AddressId,
-                    PersonId = guardian.PersonId,
-                }
-            ).ToListAsync();
-
-            if (List.Count < 0)
-            {
+            ////List<Guardian> guardians = GuardianRepo.GetAll();
+            if (guardians.Count < 0){
                 return NotFound();
             }
-            else
-            {
-                return List;
+            else{
+                return guardians;
             }
         }
 
         // GET api/<GuardianController>/5
         [HttpGet("GetGuardianById")]
-        public async Task<ActionResult<GuardianDTO>> GetGuardianById([FromBody] int id)
+        public Guardian GetGuardianById([FromBody] int id)
         {
-            Guardian? guardian = await dbContext.Guardians.SingleOrDefaultAsync(e => e.Id == id);
+            Guardian? guardian = //GuardianRepo.GetById(id);
 
             if (guardian == null)
                 return NotFound();
-
-            GuardianDTO guardianDTO = new GuardianDTO
-            {
-                Id = guardian.Id,
-                WorkPhoneNo = guardian.WorkPhoneNo,
-                AddressId = guardian.AddressId,
-                PersonId = guardian.PersonId,
-            };
-
-            return guardianDTO;
+            
+            return guardian;
         }
 
         // POST api/<GuardianController>
-        [HttpPost]
-        public async Task<HttpStatusCode> Post([FromBody] Guardian guardian)
+        [HttpPost("InsertGuardian")]
+        public HttpStatusCode InsertGuardian([FromBody] Guardian guardian)
         {
-            var entity = new Guardian()
-            {
-                Id = guardian.Id,
-                WorkPhoneNo = guardian.WorkPhoneNo,
-                PersonId = guardian.PersonId,
-                AddressId = guardian.AddressId
-            };
-
-            dbContext.Guardians.Add(entity);
-            await dbContext.SaveChangesAsync();
-
+            
+            //var result = GuardianRepo.Add(guardian);
+            //if (result == false){
+            //      return HttpStatusCode.Conflict;
+            //}
             return HttpStatusCode.Created;
         }
 
         // PUT api/<GuardianController>/5
         [HttpPut("UpdateGuardian")]
-        public async Task<HttpStatusCode> UpdateGuardian([FromBody] GuardianDTO guardian)
+        public HttpStatusCode UpdateGuardian([FromBody] Guardian guardian)
         {
-            Guardian? entity = await dbContext.Guardians.FirstOrDefaultAsync(s => s.Id == guardian.Id);
+            Guardian? entity = //GuardianRepo.GetById(guardian.Id);
             if (entity == null)
             {
                 NotFound();
@@ -96,21 +61,21 @@ namespace BetterAdminDbAPI.Controllers
             entity.AddressId = guardian.AddressId;
             entity.PersonId = guardian.PersonId;
 
-            await dbContext.SaveChangesAsync();
+            //var result = GuardianRepo.Update(entity);
+            //if (result == false){
+            //      return HttpStatusCode.Conflict();
+            //}
             return HttpStatusCode.OK;
         }
 
         // DELETE api/<GuardianController>/5
         [HttpGet("DeleteGuardianById")]
-        public async Task<HttpStatusCode> DeleteGuardian(int id)
+        public HttpStatusCode DeleteGuardian(int id)
         {
-            var entity = new Guardian()
-            {
-                Id = id
-            };
-            dbContext.Guardians.Attach(entity);
-            dbContext.Guardians.Remove(entity);
-            await dbContext.SaveChangesAsync();
+            //var result = GuardianRepo.Delete(id);
+            //if (result == false){
+            //      return NotFound();
+            //}
             return HttpStatusCode.OK;
         }
     }

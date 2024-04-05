@@ -1,8 +1,4 @@
-﻿using BetterAdminDbAPI.DTO;
-using BetterAdminDbAPI.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Utilities.Net;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Channels;
 
@@ -14,102 +10,72 @@ namespace BetterAdminDbAPI.Controllers
     [ApiController]
     public class PersonController : ControllerBase
     {
-        private readonly BetterAdminContext dbContext;
-
-        public PersonController(BetterAdminContext Context)
-        {
-            this.dbContext = Context;
-        }
         // GET: api/<PersonController>
         [HttpGet("GetPeople")]
-        public async Task<ActionResult<List<PersonDTO>>> Get()
+        public Person Get()
         {
-            List<PersonDTO> List = await dbContext.People.Select(
-                s => new PersonDTO
-                {
-                    Id = s.Id,
-                    FirstName = s.FirstName,
-                    LastName = s.LastName,
-                    PhoneNumber = s.PhoneNo,
-                    Email = s.Email
-                }).ToListAsync();
-
-            if (List.Count < 0)
-            {
+            ////List<Person> people = PersonRepo.GetAll();
+            if (people.Count < 0){
                 return NotFound();
             }
-            else
-            {
-                return List;
-            }
+            return people;
         }
 
         // GET api/<PersonController>/5
-        [HttpGet("GetPersonById")]
-        public async Task<ActionResult<PersonDTO>> GetPersonById([FromBody] int id)
+        [HttpGet("GetPersonById")]        
+        public Person GetPersonById([FromBody] int id)
         {
-            Person? person = await dbContext.People.FirstOrDefaultAsync(s => s.Id == id);
+            Person? person = //PersonRepo.GetById(id);
+
             if (person == null)
                 return NotFound();
-
-            PersonDTO personDTO = new PersonDTO 
-            {
-                Id = person.Id,
-                FirstName = person.FirstName,
-                LastName = person.LastName,
-                PhoneNumber = person.PhoneNo,
-                Email = person.Email
-            };
-                return personDTO;
+            
+            return person;
         }
 
         // POST api/<PersonController>
         [HttpPost("InsertPerson")]
-        public async Task<HttpStatusCode> Post([FromBody] PersonDTO personDTO)
+        public HttpStatusCode InsertPerson([FromBody] Person person)
         {
-            Person person = new Person()
-            {
-                FirstName = personDTO.FirstName,
-                LastName = personDTO.LastName,
-                PhoneNo = personDTO.PhoneNumber,
-                Email = personDTO.Email
-            };
-
-            dbContext.People.Add(person);
-            await dbContext.SaveChangesAsync();
-            return HttpStatusCode.OK;
+            
+            //var result = PersonRepo.Add(person);
+            //if (result == false){
+            //      return HttpStatusCode.Conflict;
+            //}
+            return HttpStatusCode.Created;
         }
 
         // PUT api/<PersonController>/5
         [HttpPut("UpdatePersonById")]
-        public async Task<HttpStatusCode> UpdatePerson(int id, [FromBody] PersonDTO changes)
+       public HttpStatusCode UpdatePerson([FromBody] Person person)
         {
-            Person? entity = await dbContext.People.FirstOrDefaultAsync(s => s.Id == changes.Id);
-
+            Person? entity = //PersonRepo.GetById(person.Id);
             if (entity == null)
-                return HttpStatusCode.NotFound;
-            
+            {
+                NotFound();
+            }
 
-            entity.FirstName = changes.FirstName;
-            entity.LastName = changes.LastName;
-            entity.PhoneNo = changes.PhoneNumber;
-            entity.Email = changes.Email;
+            entity.Id = person.Id;
+            entity.FirstName = person.FirstName;
+            entity.LastName = person.LastName;
+            entity.PhoneNo = person.PhoneNumber;
+            entity.Email = person.Email;
 
-            await dbContext.SaveChangesAsync();
+            //var result = PersonRepo.Update(entity);
+            //if (result == false){
+            //      return HttpStatusCode.Conflict;
+            //}
             return HttpStatusCode.OK;
         }
 
         // DELETE api/<PersonController>/5
         [HttpDelete("DeletePersonById")]
-        public async Task<HttpStatusCode> DeletePersonById(int id)
+        public HttpStatusCode DeletePerson(int id)
         {
-            Person? entity = await dbContext.People.FirstOrDefaultAsync(s => s.Id == id);
-            if (entity == null)
-                return HttpStatusCode.NotFound;
-
-            dbContext.People.Attach(entity);
-            dbContext.People.Remove(entity);
-            await dbContext.SaveChangesAsync();
+            //var result = PersonRepo.Delete(id);
+            //if (result == false){
+            //      return NotFound();
+            //}
             return HttpStatusCode.OK;
         }
     }

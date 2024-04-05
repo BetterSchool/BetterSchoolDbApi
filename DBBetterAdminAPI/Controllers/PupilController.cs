@@ -1,8 +1,4 @@
-﻿using BetterAdminDbAPI.DTO;
-using BetterAdminDbAPI.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Mysqlx.Prepare;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
 using System.Reflection;
@@ -13,63 +9,33 @@ namespace BetterAdminDbAPI.Controllers
     [Route("api/[controller]")]
     public class PupilController : ControllerBase
     {
-        private readonly BetterAdminContext dbContext;
-        public PupilController(BetterAdminContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
-
         // GET: api/<PupilController>
         [HttpGet("GetPupils")]
-        public async Task<ActionResult<List<PupilDTO>>> Get()
+        public HttpStatusCode Get()
         {
-            var List = await dbContext.Pupils.Select(
-                pupilInfo => new PupilDTO
-                {
-                    MobileNumber = pupilInfo.MobileNo,
-                    DateOfBirth = pupilInfo.DateOfBirth,
-                    Gender = pupilInfo.Gender,
-                    EnrollmentDate = pupilInfo.EnrollmentDate,
-                    PhotoPermission = pupilInfo.PhotoPermission,
-                    Note = pupilInfo.Note,
-                    School = pupilInfo.School,
-                    Grade = pupilInfo.Grade
-                }
-            ).ToListAsync();
-
-            if (List.Count < 0){
-                return NotFound();  }
-            else{
-                return List;    }
+            //List<Pupil> pupils = AddressRepo.GetAll();
+            if (pupils.Count < 0){
+                return NotFound();
+            }
+                return pupils;
         }
 
         // GET api/<PupilController>/5
         [HttpGet("GetPupilById")]
-        public async Task<ActionResult<PupilDTO>> Get(int id)
+        public Address GetPupilById([FromBody] int id)
         {
-            Pupil? dbPupil = await dbContext.Pupils.SingleOrDefaultAsync(e => e.Id == id);
-
-            if (dbPupil == null)
-                return NotFound();
-
-            PupilDTO pupilDTO = new PupilDTO
-            {
-                MobileNumber = dbPupil.MobileNo,
-                DateOfBirth = dbPupil.DateOfBirth,
-                Gender = dbPupil.Gender,
-                EnrollmentDate = dbPupil.EnrollmentDate,
-                PhotoPermission = dbPupil.PhotoPermission,
-                Note = dbPupil.Note,
-                School = dbPupil.School,
-                Grade = dbPupil.Grade
-            };
-
-            return pupilDTO;
+            //Pupil? pupil = PupilRepo.GetById(id);
+            if (pupil == null){
+            return NotFound();
+            }
+        
+        return pupil;
         }
+    
 
         // POST api/<PupilController>
         [HttpPost]
-        public async Task<HttpStatusCode> Post([FromBody]PupilDTO pupilDTO)
+        public HttpStatusCode Post([FromBody]Pupil pupil)
         {
             //The order of the executed code is important, as the code is requesting the use of the database, which has it's own constraints and error handling.
 
