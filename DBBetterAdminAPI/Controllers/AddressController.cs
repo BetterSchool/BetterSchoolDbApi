@@ -1,7 +1,4 @@
-﻿using BetterAdminDbAPI.DTO;
-using BetterAdminDbAPI.Entities;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace BetterAdminDbAPI.Controllers
@@ -10,79 +7,30 @@ namespace BetterAdminDbAPI.Controllers
     [Route("api/[controller]")]
     public class AddressController : ControllerBase
     {
-        private readonly BetterAdminContext dbContext;
-
-        public AddressController(BetterAdminContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
 
         [HttpGet("GetAddresses")]
-        public async Task<ActionResult<List<AddressDTO>>> Get()
+        public List<Address> Get()
         {
-            //var List = await dbContext.Addresses.Select(
-            //    s => new AddressDTO
-            //    {
-            //        Id = s.Id,
-            //        City = s.City,
-            //        Road = s.Road,
-            //        PostalCode = s.PostalCode
-            //    }
-            //).ToListAsync();
-
-            //if (List.Count < 0)
-            //{
-                return NotFound("plz help");
-            //}
-            //else
-            //{
-            //    return List;
-            //}
+            
         }
 
         [HttpGet("GetAddressById")]
-        public async Task<ActionResult<AddressDTO>> GetAddressById([FromBody] int id)
+        public Address GetAddressById([FromBody] int id)
         {
-            AddressDTO? Address = await dbContext.Addresses.Select(
-                    s => new AddressDTO
-                    {
-                        Id = s.Id,
-                        City = s.City,
-                        Road = s.Road,
-                        PostalCode = s.PostalCode
-                    })
-                .FirstOrDefaultAsync(s => s.Id == id);
 
-            if (Address == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Address;
-            }
         }
 
         [HttpPost("InsertAddress")]
-        public async Task<HttpStatusCode> InsertAddress([FromBody] AddressDTO address)
+        public HttpStatusCode InsertAddress([FromBody] Address address)
         {
-            var entity = new Address()
-            {
-                City = address.City,
-                Road = address.Road,
-                PostalCode = address.PostalCode
-            };
-
-            dbContext.Addresses.Add(entity);
-            await dbContext.SaveChangesAsync();
 
             return HttpStatusCode.Created;
         }
 
         [HttpPut("UpdateAddress")]
-        public async Task<HttpStatusCode> UpdateAddress([FromBody] AddressDTO address)
+        public HttpStatusCode UpdateAddress([FromBody] Address address)
         {
-            Address? entity = await dbContext.Addresses.FirstOrDefaultAsync(s => s.Id == address.Id);
+            Address? entity = //Repo.Get(Address);
             if(entity == null)
             {
                 NotFound();
@@ -91,21 +39,15 @@ namespace BetterAdminDbAPI.Controllers
             entity.City = address.City;
             entity.Road = address.Road;
             entity.PostalCode = address.PostalCode;
-
-            await dbContext.SaveChangesAsync();
+            
+            //AddressRepo.UpdateAddress(entity);
             return HttpStatusCode.OK;
         }
 
         [HttpDelete("DeleteAddress/{Id}")]
-        public async Task<HttpStatusCode> DeleteAddress([FromBody] int id)
+        public HttpStatusCode DeleteAddress([FromBody] int id)
         {
-            var entity = new Address()
-            {
-                Id = id
-            };
-            dbContext.Addresses.Attach(entity);
-            dbContext.Addresses.Remove(entity);
-            await dbContext.SaveChangesAsync();
+            //AddressRepo.Delete(id);
             return HttpStatusCode.OK;
         }
     }
