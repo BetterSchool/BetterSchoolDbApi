@@ -20,24 +20,24 @@ namespace BetterAdminDbAPI.Controllers
         [HttpGet("GetAddresses")]
         public async Task<ActionResult<List<AddressDTO>>> Get()
         {
-            var List = await dbContext.Addresses.Select(
-                s => new AddressDTO
-                {
-                    Id = s.Id,
-                    City = s.City,
-                    Road = s.Road,
-                    PostalCode = s.PostalCode
-                }
-            ).ToListAsync();
+            //var List = await dbContext.Addresses.Select(
+            //    s => new AddressDTO
+            //    {
+            //        Id = s.Id,
+            //        City = s.City,
+            //        Road = s.Road,
+            //        PostalCode = s.PostalCode
+            //    }
+            //).ToListAsync();
 
-            if (List.Count < 0)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return List;
-            }
+            //if (List.Count < 0)
+            //{
+                return NotFound("plz help");
+            //}
+            //else
+            //{
+            //    return List;
+            //}
         }
 
         [HttpGet("GetAddressById")]
