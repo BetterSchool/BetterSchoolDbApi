@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using BetterAdminDbAPI.Model;
 
 namespace BetterAdminDbAPI.Controllers
 {
@@ -9,21 +10,22 @@ namespace BetterAdminDbAPI.Controllers
     {
 
         [HttpGet("GetAddresses")]
-        public List<Address> Get()
+        public HttpStatusCode Get(HttpRequestMessage request)
         {
-            
+            //List<Address> addresses = AddressRepo.GetAll();
+            //return addresses;
         }
 
         [HttpGet("GetAddressById")]
         public Address GetAddressById([FromBody] int id)
         {
-
+            //AddressRepo.GetById(id);
         }
 
         [HttpPost("InsertAddress")]
         public HttpStatusCode InsertAddress([FromBody] Address address)
         {
-
+            //AddressRepo.Create(address);
             return HttpStatusCode.Created;
         }
 
