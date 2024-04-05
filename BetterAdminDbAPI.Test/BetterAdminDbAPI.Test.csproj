@@ -15,6 +15,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
     <PackageReference Include="coverlet.collector" Version="3.2.0" />
     <PackageReference Include="MySqlConnector" Version="2.3.6" />
+    <PackageReference Include="MySqlConnector.DependencyInjection" Version="2.3.6" />
   </ItemGroup>
 
   <ItemGroup>
