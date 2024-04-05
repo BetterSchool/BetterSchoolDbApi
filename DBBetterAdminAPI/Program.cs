@@ -1,6 +1,3 @@
-using BetterAdminDbAPI.Entities;
-using Microsoft.EntityFrameworkCore;
-using MySql.EntityFrameworkCore.Extensions;
 
 namespace BetterAdminDbAPI
 {
@@ -17,10 +14,6 @@ namespace BetterAdminDbAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddEntityFrameworkMySQL().AddDbContext<BetterAdminContext>(options =>
-            {
-                options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection"));
-            });
 
             var app = builder.Build();
 
