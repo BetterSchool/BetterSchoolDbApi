@@ -60,12 +60,15 @@ namespace BetterAdminDbAPI.Controllers
             entity.WorkPhoneNo = guardian.WorkPhoneNo;
             entity.AddressId = guardian.AddressId;
             entity.PersonId = guardian.PersonId;
+            entity.Email = guardian.Email;
 
             //var result = GuardianRepo.Update(entity);
             //if (result == false){
             //      return HttpStatusCode.Conflict();
             //}
-            return HttpStatusCode.OK;
+            else{
+                return HttpStatusCode.OK;
+            }
         }
 
         // DELETE api/<GuardianController>/5
