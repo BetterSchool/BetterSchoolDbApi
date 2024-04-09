@@ -22,10 +22,10 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // GET api/<PersonController>/5
-        [HttpGet("GetPersonById")]        
-        public Person GetPersonById([FromBody] int id)
+        [HttpGet("GetPersonByEmail")]        
+        public Person GetPersonByEmail([FromBody] String email)
         {
-            Person? person = //PersonRepo.GetById(id);
+            Person? person = //PersonRepo.GetByEmail(email);
 
             if (person == null)
                 return NotFound();
@@ -46,10 +46,10 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // PUT api/<PersonController>/5
-        [HttpPut("UpdatePersonById")]
+        [HttpPut("UpdatePerson")]
        public HttpStatusCode UpdatePerson([FromBody] Person person)
         {
-            Person? entity = //PersonRepo.GetById(person.Id);
+            Person? entity = //PersonRepo.GetByEmail(person.Email);
             if (entity == null)
             {
                 NotFound();

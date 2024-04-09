@@ -21,10 +21,10 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // GET api/<PupilController>/5
-        [HttpGet("GetPupilById")]
-        public Address GetPupilById([FromBody] int id)
+        [HttpGet("GetPupilByEmail")]
+        public Address GetPupilByEmail([FromBody] String email)
         {
-            //Pupil? pupil = PupilRepo.GetById(id);
+            //Pupil? pupil = PupilRepo.GetByEmail(email);
             if (pupil == null){
             return NotFound();
             }

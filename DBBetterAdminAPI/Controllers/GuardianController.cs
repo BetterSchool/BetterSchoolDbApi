@@ -23,10 +23,10 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // GET api/<GuardianController>/5
-        [HttpGet("GetGuardianById")]
-        public Guardian GetGuardianById([FromBody] int id)
+        [HttpGet("GetGuardianByEmail")]
+        public Guardian GetGuardianByEmail([FromBody] String email)
         {
-            Guardian? guardian = //GuardianRepo.GetById(id);
+            Guardian? guardian = //GuardianRepo.GetByEmail(email);
 
             if (guardian == null)
                 return NotFound();
@@ -50,7 +50,7 @@ namespace BetterAdminDbAPI.Controllers
         [HttpPut("UpdateGuardian")]
         public HttpStatusCode UpdateGuardian([FromBody] Guardian guardian)
         {
-            Guardian? entity = //GuardianRepo.GetById(guardian.Id);
+            Guardian? entity = //GuardianRepo.GetByEmail(guardian.Email);
             if (entity == null)
             {
                 NotFound();
