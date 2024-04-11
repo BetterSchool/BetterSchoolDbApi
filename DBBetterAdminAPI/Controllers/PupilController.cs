@@ -1,32 +1,56 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using BetterAdminDbAPI.Model;
+using BetterAdminDbAPI.Repository;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Reflection;
+using MySqlConnector;
+using System.Web.Http;
+using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
+using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
+using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
+using FromBodyAttribute = Microsoft.AspNetCore.Mvc.FromBodyAttribute;
+using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;
 
 namespace BetterAdminDbAPI.Controllers
 {
+
+
     [ApiController]
     [Route("api/[controller]")]
     public class PupilController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
+        private static readonly MySqlConnection _con;
+        PupilRepository repo = new PupilRepository(_con);
+
+        public PupilController(IConfiguration configuration)
+        {
+
+            _configuration = configuration;
+
+            _con = new MySqlConnection(_configuration.GetConnectionString("MyDBConnection"));
+        }
+
         // GET: api/<PupilController>
         [HttpGet("GetPupils")]
-        public HttpStatusCode Get()
+        public List<Pupil> Get()
         {
-            //List<Pupil> pupils = AddressRepo.GetAll();
+            List<Pupil> pupils = repo.GetAll();
             if (pupils.Count < 0){
-                return NotFound();
+                throw new HttpResponseException(HttpStatusCode.NotFound);
             }
                 return pupils;
         }
 
         // GET api/<PupilController>/5
         [HttpGet("GetPupilByEmail")]
-        public Address GetPupilByEmail([FromBody] String email)
+        public Pupil GetPupilByEmail([FromBody] string email)
         {
-            //Pupil? pupil = PupilRepo.GetByEmail(email);
+            Pupil? pupil = repo.Get(email);
             if (pupil == null){
-            return NotFound();
+                throw new HttpResponseException(HttpStatusCode.NotFound);
             }
         
         return pupil;
@@ -35,49 +59,45 @@ namespace BetterAdminDbAPI.Controllers
 
         // POST api/<PupilController>
         [HttpPost]
-        public HttpStatusCode Post([FromBody]Pupil pupil, Guardian? guardian)
+        public Pupil Post([FromBody]Pupil pupil)
         {
             //The order of the executed code is important, as the code is requesting the use of the database, which has it's own constraints and error handling.
 
             //Create guardian if:
             if (pupil == null){
-                return HttpStatusCode.Conflict;
+                throw new HttpResponseException(HttpStatusCode.Conflict); 
             }
-            if (guardian != null){
-                //var result = PupilRepo.CreatePupil(pupil, guardian);
-                //if (result == false){
-                //return HttpStatusCode.Conflict;
-                //}
-            }
-            else{
-                //var result = PupilRepo.CreatePupil(pupil);
-                //if (result == false){
-                //return HttpStatusCode.Conflict;
-                //}
-            }
-            return HttpStatusCode.Created;
+                var result = repo.Create(pupil);
+
+                if (result == null){
+                    throw new HttpResponseException(HttpStatusCode.Conflict);
+                }
+
+            return result;
         }
 
         // PUT api/<PupilController>/5
         [HttpPut("UpdatePupil")]
-        public async Task<HttpStatusCode> UpdatePupil([FromBody] String email, Pupil pupilChanges)
+        public HttpStatusCode UpdatePupil([FromBody] Pupil pupilChanges)
         {
-            //var result = PupilRepo.Update(email, pupilChanges)
-            //if (result == false){
-            //return HttpStatusCode.Conflict;
-            //}
+            var result = repo.Update(pupilChanges);
+
+            if (result == false){
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
 
             return HttpStatusCode.OK;
         }
 
         // DELETE api/<PupilController>/5
         [HttpGet("DeletePupilById")]
-        public async Task<HttpStatusCode> Delete(int id)
+        public HttpStatusCode Delete(Pupil pupil)
         {
-            //var result = PupilRepo.DeleteById(id)
-            //if (result == false){
-            //return HttpStatusCode.Conflict;
-            //}
+            var result = repo.Delete(pupil);
+
+            if (result == false){
+                throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
             return HttpStatusCode.OK;
         }
     }
