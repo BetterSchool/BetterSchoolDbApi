@@ -22,15 +22,14 @@ namespace BetterAdminDbAPI.Controllers
     public class PupilController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private static readonly MySqlConnection _con;
-        PupilRepository repo = new PupilRepository(_con);
+        private readonly MySqlConnection _con;
+        PupilRepository repo;
 
         public PupilController(IConfiguration configuration)
         {
-
             _configuration = configuration;
-
             _con = new MySqlConnection(_configuration.GetConnectionString("MyDBConnection"));
+            repo = new PupilRepository(_con);
         }
 
         // GET: api/<PupilController>
