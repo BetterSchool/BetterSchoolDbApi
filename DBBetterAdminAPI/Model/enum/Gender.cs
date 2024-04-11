@@ -1,6 +1,6 @@
 ﻿namespace BetterAdminDbAPI.Model.@enum
 {
-    public enum Gender
+    public enum GenderEnum
     {
         boy,
         girl,

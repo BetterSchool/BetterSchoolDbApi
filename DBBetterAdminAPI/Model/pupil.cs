@@ -10,7 +10,7 @@ namespace BetterAdminDbAPI.Model
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string PhoneNo { get; set; }
-        public Gender Gender { get; set; }
+        public GenderEnum Gender { get; set; }
         public DateOnly EnrollmentDate { get; set; }
         public string? Note { get; set; }
         public bool PhotoPermission { get; set; }
