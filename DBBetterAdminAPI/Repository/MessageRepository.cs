@@ -73,7 +73,7 @@ namespace BetterAdminDbAPI.Repository
             using (_con)
             {
                 _con.Open();
-                MySqlCommand cmd = new MySqlCommand("INSERT INTO messages (content, attachment, time_sent, sender_email, receiver_email)" +
+                MySqlCommand cmd = new MySqlCommand("INSERT INTO message (content, attachment, time_sent, sender_email, receiver_email)" +
                     "VALUES(@content, @attachment, @time_sent, @sender_email, @receiver_email)", _con);
 
                 cmd.Parameters.AddWithValue("@content", messageToCreate.Content);
