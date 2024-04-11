@@ -1,4 +1,6 @@
 
+using MySqlConnector;
+
 namespace BetterAdminDbAPI
 {
     public class Program
@@ -14,7 +16,7 @@ namespace BetterAdminDbAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
+            builder.Services.AddMySqlDataSource(builder.Configuration.GetConnectionString("MyDBConnection"));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
