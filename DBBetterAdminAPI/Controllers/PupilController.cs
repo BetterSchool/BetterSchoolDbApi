@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using BetterAdminDbAPI.Model;
 using BetterAdminDbAPI.Repository;
-using Microsoft.Extensions.Configuration;
 using System.Net;
-using System.Reflection;
 using MySqlConnector;
 using System.Web.Http;
 using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
