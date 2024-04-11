@@ -2,6 +2,7 @@
 using BetterAdminDbAPI.Model.@enum;
 using MySqlConnector;
 using System.Data;
+using System.Data.Common;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -16,6 +17,7 @@ namespace BetterAdminDbAPI.Repository
         public PupilRepository(MySqlConnection connection)
         {
             _con = connection;
+            //_con = new MySqlConnection("server=104.199.62.75;uid=bauser;pwd=blowfish21seahorse;database=better_admin");
             guardianRepo = new GuardianRepository(connection);
         }
 
@@ -41,6 +43,7 @@ namespace BetterAdminDbAPI.Repository
 
                         Pupil pupil = new Pupil()
                         {
+                            PupilId = Convert.ToInt32(reader["pupil_id"]),
                             Email = reader["email"].ToString(),
                             HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
                             Salt = reader["salt"].ToString(),
@@ -48,7 +51,7 @@ namespace BetterAdminDbAPI.Repository
                             LastName = reader["last_name"].ToString(),
                             PhoneNo = reader["phone_no"].ToString(),
                             Gender = gender,
-                            EnrollmentDate = DateOnly.Parse(reader["enrollment_date"].ToString()),
+                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
                             Note = reader["note"].ToString(),
                             PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
                             School = reader["school"].ToString(),
@@ -58,8 +61,8 @@ namespace BetterAdminDbAPI.Repository
                             PostalCode = reader["postal_code"].ToString()
                         };
                         // Add guardian if GuardianEmail != null
-                        string guardianEmail = reader["guardian_email"].ToString();
-                        if (guardianEmail != null)
+                        string? guardianEmail = Convert.ToString(reader["guardian_email"]);
+                        if (guardianEmail != "")
                         {
                             pupil.Guardian = guardianRepo.Get(guardianEmail);
                         }
@@ -92,6 +95,7 @@ namespace BetterAdminDbAPI.Repository
                     Enum.TryParse<GenderEnum>(reader["gender"].ToString(), out gender);
                     Pupil pupil = new Pupil()
                     {
+                        PupilId = Convert.ToInt32(reader["pupil_id"]),
                         Email = email,
                         HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
                         Salt = reader["salt"].ToString(),
@@ -99,7 +103,7 @@ namespace BetterAdminDbAPI.Repository
                         LastName = reader["last_name"].ToString(),
                         PhoneNo = reader["phone_no"].ToString(),
                         Gender = gender,
-                        EnrollmentDate = DateOnly.Parse(reader["enrollment_date"].ToString()),
+                        EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
                         Note = reader["note"].ToString(),
                         PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
                         School = reader["school"].ToString(),
@@ -109,8 +113,8 @@ namespace BetterAdminDbAPI.Repository
                         PostalCode = reader["postal_code"].ToString()
                     };
                     // Add guardian if GuardianEmail != null
-                    string guardianEmail = reader["guardian_email"].ToString();
-                    if (guardianEmail != null)
+                    string? guardianEmail = Convert.ToString(reader["guardian_email"]);
+                    if (guardianEmail != "")
                     {
                         pupil.Guardian = guardianRepo.Get(guardianEmail);
                     }
@@ -172,8 +176,8 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("pcity", pupilToCreate.City);
                 cmd.Parameters["pcity"].Direction = ParameterDirection.Input;
 
-                cmd.Parameters.AddWithValue("road", pupilToCreate.Road);
-                cmd.Parameters["road"].Direction = ParameterDirection.Input;
+                cmd.Parameters.AddWithValue("proad", pupilToCreate.Road);
+                cmd.Parameters["proad"].Direction = ParameterDirection.Input;
 
                 cmd.Parameters.AddWithValue("ppostal_code", pupilToCreate.PostalCode);
                 cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
@@ -182,10 +186,8 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters["pguardian_email"].Direction = ParameterDirection.Input;
 
                 cmd.ExecuteNonQuery();
-
-                pupilToReturn = Get(pupilToCreate.Email);
             }
-
+            //pupilToReturn = Get(pupilToCreate.Email);
             return pupilToReturn;
         }
 

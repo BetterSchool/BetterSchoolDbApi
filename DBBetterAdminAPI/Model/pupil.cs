@@ -1,4 +1,6 @@
 ﻿using BetterAdminDbAPI.Model.@enum;
+using BetterAdminDbAPI.Other;
+using System.Text.Json.Serialization;
 
 namespace BetterAdminDbAPI.Model
 {
@@ -12,7 +14,7 @@ namespace BetterAdminDbAPI.Model
         public string LastName { get; set; }
         public string PhoneNo { get; set; }
         public GenderEnum Gender { get; set; }
-        public DateOnly EnrollmentDate { get; set; }
+        public DateTime EnrollmentDate { get; set; }
         public string? Note { get; set; }
         public bool PhotoPermission { get; set; }
         public string School { get; set; }
