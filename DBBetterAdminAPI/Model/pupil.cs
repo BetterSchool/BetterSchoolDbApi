@@ -20,6 +20,6 @@ namespace BetterAdminDbAPI.Model
         public string City { get; set; }
         public string Road { get; set; }
         public string PostalCode { get; set; }
-        public string? GuardianEmail { get; set; }
+        public Guardian? Guardian { get; set; }
     }
 }

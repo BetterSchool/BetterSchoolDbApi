@@ -1,7 +1,9 @@
 ﻿using BetterAdminDbAPI.DTO;
 using BetterAdminDbAPI.Entities;
+using BetterAdminDbAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using Mysqlx.Prepare;
 using System;
 using System.Net;
@@ -9,14 +11,20 @@ using System.Reflection;
 
 namespace BetterAdminDbAPI.Controllers
 {
+    
+
     [ApiController]
     [Route("api/[controller]")]
     public class PupilController : ControllerBase
     {
-        private readonly BetterAdminContext dbContext;
-        public PupilController(BetterAdminContext dbContext)
+        private readonly MySqlConnection _con;
+        private readonly IConfiguration _configuration;
+        PupilRepository repo;
+        public PupilController(IConfiguration config)
         {
-            this.dbContext = dbContext;
+            _configuration = config;
+            _con = new MySqlConnection(_configuration.GetConnectionString("MyDBConnection"));
+            repo = new PupilRepository(_con);
         }
 
         // GET: api/<PupilController>
