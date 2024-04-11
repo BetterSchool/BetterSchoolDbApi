@@ -42,7 +42,7 @@ namespace BetterAdminDbAPI.Controllers
 
         // GET api/<PupilController>/5
         [HttpGet("GetPupilByEmail")]
-        public Pupil GetPupilByEmail([FromBody] string email)
+        public Pupil GetPupilByEmail(string email)
         {
             Pupil? pupil = repo.Get(email);
             if (pupil == null){
@@ -87,7 +87,7 @@ namespace BetterAdminDbAPI.Controllers
 
         // DELETE api/<PupilController>/5
         [HttpGet("DeletePupilById")]
-        public HttpStatusCode Delete(Pupil pupil)
+        public HttpStatusCode Delete([FromBody]Pupil pupil)
         {
             var result = repo.Delete(pupil);
 
