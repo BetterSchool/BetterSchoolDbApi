@@ -257,7 +257,7 @@ namespace BetterAdminDbAPI.Repository
             return rowsAffected != 0;
         }
 
-        public bool Delete(Pupil pupilToDelete)
+        public bool Delete(string email)
         {
             int rowsAffected = 0;
             using (_con)
@@ -270,7 +270,7 @@ namespace BetterAdminDbAPI.Repository
                 cmd.CommandText = "usp_pupil_delete";
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@pemail", pupilToDelete.Email);
+                cmd.Parameters.AddWithValue("@pemail", email);
                 cmd.Parameters["@pemail"].Direction = ParameterDirection.Input;
 
                 rowsAffected = cmd.ExecuteNonQuery();

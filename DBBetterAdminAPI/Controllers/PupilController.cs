@@ -86,10 +86,10 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // DELETE api/<PupilController>/5
-        [HttpPut("DeletePupilById")]
-        public HttpStatusCode DeletePupilById([FromUri]int id)
+        [HttpPut("DeletePupilByEmail")]
+        public HttpStatusCode DeletePupilById([FromUri]string email)
         {
-            var result = repo.Delete(id);
+            var result = repo.Delete(email);
 
             if (result == false){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
