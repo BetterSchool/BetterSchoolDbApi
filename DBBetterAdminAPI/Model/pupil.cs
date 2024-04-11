@@ -4,6 +4,7 @@ namespace BetterAdminDbAPI.Model
 {
     public class Pupil
     {
+        public int PupilId { get; set; }
         public string Email { get; set; }
         public string HashedSaltedPassword { get; set; }
         public string Salt { get; set; }
