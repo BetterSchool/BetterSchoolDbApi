@@ -20,20 +20,20 @@ namespace BetterAdminDbAPI.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly MySqlConnection _con;
-        PupilRepository repo;
+        PupilRepository _repo;
 
         public PupilController(IConfiguration configuration)
         {
             _configuration = configuration;
             _con = new MySqlConnection(_configuration.GetConnectionString("MyDBConnection"));
-            repo = new PupilRepository(_con);
+            _repo = new PupilRepository(_con);
         }
 
         // GET: api/<PupilController>
         [HttpGet("GetPupils")]
         public List<Pupil> Get()
         {
-            List<Pupil> pupils = repo.GetAll();
+            List<Pupil> pupils = _repo.GetAll();
             if (pupils.Count < 0){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
@@ -44,7 +44,7 @@ namespace BetterAdminDbAPI.Controllers
         [HttpGet("GetPupilByEmail")]
         public Pupil GetPupilByEmail([FromUri]string email)
         {
-            Pupil? pupil = repo.Get(email);
+            Pupil? pupil = _repo.Get(email);
             if (pupil == null){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
@@ -63,7 +63,7 @@ namespace BetterAdminDbAPI.Controllers
             if (pupil == null){
                 throw new HttpResponseException(HttpStatusCode.Conflict); 
             }
-                var result = repo.Create(pupil);
+                var result = _repo.Create(pupil);
 
                 if (result == null){
                     throw new HttpResponseException(HttpStatusCode.Conflict);
@@ -76,7 +76,7 @@ namespace BetterAdminDbAPI.Controllers
         [HttpPut("UpdatePupil")]
         public HttpStatusCode UpdatePupil([FromBody] Pupil pupilChanges)
         {
-            var result = repo.Update(pupilChanges);
+            var result = _repo.Update(pupilChanges);
 
             if (result == false){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
@@ -89,7 +89,7 @@ namespace BetterAdminDbAPI.Controllers
         [HttpPut("DeletePupilByEmail")]
         public HttpStatusCode DeletePupilById([FromUri]string email)
         {
-            var result = repo.Delete(email);
+            var result = _repo.Delete(email);
 
             if (result == false){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
