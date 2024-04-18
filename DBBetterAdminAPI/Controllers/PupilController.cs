@@ -57,17 +57,20 @@ namespace BetterAdminDbAPI.Controllers
         [HttpPost]
         public Pupil Post([FromBody]Pupil pupil)
         {
-            //The order of the executed code is important, as the code is requesting the use of the database, which has it's own constraints and error handling.
+            //Check for already existing Pupil
+            Pupil? entry = _repo.Get(pupil.Email);
 
-            //Create guardian if:
-            if (pupil == null){
+            if (entry != null)
+            {
                 throw new HttpResponseException(HttpStatusCode.Conflict); 
             }
-                var result = _repo.Create(pupil);
 
-                if (result == null){
-                    throw new HttpResponseException(HttpStatusCode.Conflict);
-                }
+            var result = _repo.Create(pupil);
+
+            if (result == null)
+            {
+                throw new HttpResponseException(HttpStatusCode.Conflict);
+            }
 
             return result;
         }

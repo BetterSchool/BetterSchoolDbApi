@@ -116,5 +116,10 @@ namespace BetterAdminDbAPI.Repository
             }
             return rowsAffected != 0;
         }
+
+        public static implicit operator ConcertRepository(WaitListRepository v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
