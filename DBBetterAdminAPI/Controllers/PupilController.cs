@@ -19,14 +19,14 @@ namespace BetterAdminDbAPI.Controllers
     public class PupilController : ControllerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly MySqlConnection _con;
+        private readonly string _connectionString;
         PupilRepository repo;
 
         public PupilController(IConfiguration configuration)
         {
             _configuration = configuration;
-            _con = new MySqlConnection(_configuration.GetConnectionString("MyDBConnection"));
-            repo = new PupilRepository(_con);
+            _connectionString = _configuration.GetConnectionString("MyDBConnection");
+            repo = new PupilRepository(_connectionString);
         }
 
         // GET: api/<PupilController>
@@ -78,7 +78,7 @@ namespace BetterAdminDbAPI.Controllers
         {
             var result = repo.Update(pupilChanges);
 
-            if (result == false){
+            if (result == null){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 

@@ -11,29 +11,22 @@ namespace BetterAdminDbAPI.Repository
 {
     public class PupilRepository
     {
-        private readonly MySqlConnection _con;
-        private readonly GuardianRepository guardianRepo;
+        private readonly string _connectionString;
+        private List<Pupil> _pupils = new();
 
-        public PupilRepository(MySqlConnection connection)
+        public PupilRepository(string connectionString)
         {
-            _con = connection;
-            //_con = new MySqlConnection("server=104.199.62.75;uid=bauser;pwd=blowfish21seahorse;database=better_admin");
-            guardianRepo = new GuardianRepository(connection);
+            _connectionString = connectionString;
+            _pupils = GetAll();
         }
 
         public List<Pupil> GetAll()
         {
-            List<Pupil> pupilsToReturn = new List<Pupil>();
-            using (_con)
+            _pupils.Clear();
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
-
-                cmd.CommandText = "usp_pupil_getall";
-                cmd.CommandType = CommandType.StoredProcedure;
-
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT email, hashed_salted_password, salt, first_name, last_name, phone_no, gender, enrollment_date, note, photo_permission, school, grade, city, road, postal_code, pupil_id, guardian_email FROM pupil_credentials", con);
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -52,36 +45,31 @@ namespace BetterAdminDbAPI.Repository
                             PhoneNo = reader["phone_no"].ToString(),
                             Gender = gender,
                             EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
-                            Note = reader["note"].ToString(),
+                            Note = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString(),
                             PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
                             School = reader["school"].ToString(),
                             Grade = Convert.ToInt32(reader["grade"]),
                             City = reader["city"].ToString(),
                             Road = reader["road"].ToString(),
-                            PostalCode = reader["postal_code"].ToString()
+                            PostalCode = reader["postal_code"].ToString(),
+                            GuardianEmail = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString()
                         };
-                        // Add guardian if GuardianEmail != null
-                        string? guardianEmail = Convert.ToString(reader["guardian_email"]);
-                        if (guardianEmail != "")
-                        {
-                            pupil.Guardian = guardianRepo.Get(guardianEmail);
-                        }
-                        pupilsToReturn.Add(pupil);
+                        _pupils.Add(pupil);
                     }
                 }
             }
-            return pupilsToReturn;
+            return _pupils;
         }
 
         public Pupil Get(string email)
         {
             Pupil pupilToReturn = null;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_pupil_get";
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -106,20 +94,15 @@ namespace BetterAdminDbAPI.Repository
                             PhoneNo = reader["phone_no"].ToString(),
                             Gender = gender,
                             EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
-                            Note = reader["note"].ToString(),
+                            Note = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString(),
                             PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
                             School = reader["school"].ToString(),
                             Grade = Convert.ToInt32(reader["grade"]),
                             City = reader["city"].ToString(),
                             Road = reader["road"].ToString(),
-                            PostalCode = reader["postal_code"].ToString()
+                            PostalCode = reader["postal_code"].ToString(),
+                            GuardianEmail = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString()
                         };
-                        // Add guardian if GuardianEmail != null
-                        string? guardianEmail = Convert.ToString(reader["guardian_email"]);
-                        if (guardianEmail != "")
-                        {
-                            pupil.Guardian = guardianRepo.Get(guardianEmail);
-                        }
                         pupilToReturn = pupil;
                     }
                 }
@@ -129,80 +112,51 @@ namespace BetterAdminDbAPI.Repository
 
         public Pupil Create(Pupil pupilToCreate)
         {
-            Pupil pupilToReturn = new Pupil();
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("INSERT INTO credentials (email, hashed_salted_password, salt)" +
+                    "VALUES(@email, @hashed_salted_password, @salt);" +
+                    "INSERT INTO pupil (first_name, last_name, phone_no, gender, enrollment_date, note, photo_permission, school, grade, city, road, postal_code, email)" +
+                    "VALUES(@first_name, @last_name, @phone_no, @gender, @enrollment_date, @note, @photo_permission, @school, @grade, @city, @road, @postal_code, @email)", con);
 
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Parameters.AddWithValue("@email", pupilToCreate.Email);
+                cmd.Parameters.AddWithValue("@hashed_salted_password", pupilToCreate.HashedSaltedPassword);
+                cmd.Parameters.AddWithValue("@salt", pupilToCreate.Salt);
+                cmd.Parameters.AddWithValue("@first_name", pupilToCreate.FirstName);
+                cmd.Parameters.AddWithValue("@last_name", pupilToCreate.LastName);
+                cmd.Parameters.AddWithValue("@phone_no", pupilToCreate.PhoneNo);
+                cmd.Parameters.AddWithValue("@gender", pupilToCreate.Gender.ToString());
+                cmd.Parameters.AddWithValue("@enrollment_date", pupilToCreate.EnrollmentDate);
+                cmd.Parameters.AddWithValue("@note", pupilToCreate.Note);
+                cmd.Parameters.AddWithValue("@photo_permission", pupilToCreate.PhotoPermission);
+                cmd.Parameters.AddWithValue("@school", pupilToCreate.School);
+                cmd.Parameters.AddWithValue("@grade", pupilToCreate.Grade);
+                cmd.Parameters.AddWithValue("@city", pupilToCreate.City);
+                cmd.Parameters.AddWithValue("@road", pupilToCreate.Road);
+                cmd.Parameters.AddWithValue("@postal_code", pupilToCreate.PostalCode);
 
-                cmd.CommandText = "usp_guardian_insert";
-                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.ExecuteNonQuery();
 
-                cmd.Parameters.AddWithValue("pemail", pupilToCreate.Email);
-                cmd.Parameters["pemail"].Direction = ParameterDirection.Input;
+                if (cmd.LastInsertedId != null)
+                    cmd.Parameters.Add(new MySqlParameter("newId", cmd.LastInsertedId));
 
-                cmd.Parameters.AddWithValue("phashed_salted_password", pupilToCreate.HashedSaltedPassword);
-                cmd.Parameters["phashed_salted_password"].Direction = ParameterDirection.Input;
+                _pupils.Add(pupilToCreate);
+                _pupils[_pupils.Count - 1].PupilId = Convert.ToInt32(cmd.Parameters["@newId"].Value);
 
-                cmd.Parameters.AddWithValue("psalt", pupilToCreate.Salt);
-                cmd.Parameters["psalt"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pfirst_name", pupilToCreate.FirstName);
-                cmd.Parameters["pfirst_name"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("plast_name", pupilToCreate.LastName);
-                cmd.Parameters["plast_name"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pphone_no", pupilToCreate.PhoneNo);
-                cmd.Parameters["pphone_no"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pgender", pupilToCreate.Gender);
-                cmd.Parameters["pgender"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("penrollment_date", pupilToCreate.EnrollmentDate);
-                cmd.Parameters["penrollment_date"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pnote", pupilToCreate.Note);
-                cmd.Parameters["pnote"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pphoto_permission", pupilToCreate.PhotoPermission);
-                cmd.Parameters["pphoto_permission"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pschool", pupilToCreate.School);
-                cmd.Parameters["pschool"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pgrade", pupilToCreate.Grade);
-                cmd.Parameters["pgrade"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pcity", pupilToCreate.City);
-                cmd.Parameters["pcity"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("proad", pupilToCreate.Road);
-                cmd.Parameters["proad"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("ppostal_code", pupilToCreate.PostalCode);
-                cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pguardian_email", pupilToCreate.Guardian?.Email);
-                cmd.Parameters["pguardian_email"].Direction = ParameterDirection.Input;
-
-                cmd.ExecuteNonQueryAsync();
             }
-            //pupilToReturn = Get(pupilToCreate.Email);
-            return pupilToReturn;
+            return _pupils[_pupils.Count - 1];
         }
 
-        public bool Update(Pupil pupilToUpdate)
+        public Pupil Update(Pupil pupilToUpdate)
         {
-            int rowsAffected = 0;
-            using (_con)
+            var obj = _pupils.FirstOrDefault(x => x.Email == pupilToUpdate.Email);
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_pupil_update";
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -225,7 +179,7 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("pphone_no", pupilToUpdate.PhoneNo);
                 cmd.Parameters["pphone_no"].Direction = ParameterDirection.Input;
 
-                cmd.Parameters.AddWithValue("pgender", pupilToUpdate.Gender);
+                cmd.Parameters.AddWithValue("pgender", pupilToUpdate.Gender.ToString());
                 cmd.Parameters["pgender"].Direction = ParameterDirection.Input;
 
                 cmd.Parameters.AddWithValue("penrollment_date", pupilToUpdate.EnrollmentDate);
@@ -252,23 +206,41 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("ppostal_code", pupilToUpdate.PostalCode);
                 cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
 
-                cmd.Parameters.AddWithValue("pguardian_email", pupilToUpdate.Guardian?.Email);
+                cmd.Parameters.AddWithValue("pguardian_email", pupilToUpdate.GuardianEmail);
                 cmd.Parameters["pguardian_email"].Direction = ParameterDirection.Input;
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
-            return rowsAffected != 0;
+            if (obj != null)
+            {
+                obj.HashedSaltedPassword = pupilToUpdate.HashedSaltedPassword;
+                obj.Salt = pupilToUpdate.Salt;
+                obj.FirstName = pupilToUpdate.FirstName;
+                obj.LastName = pupilToUpdate.LastName;
+                obj.PhoneNo = pupilToUpdate.PhoneNo;
+                obj.Gender = pupilToUpdate.Gender;
+                obj.EnrollmentDate = pupilToUpdate.EnrollmentDate;
+                obj.Note = pupilToUpdate.Note;
+                obj.PhotoPermission = pupilToUpdate.PhotoPermission;
+                obj.School = pupilToUpdate.School;
+                obj.Grade = pupilToUpdate.Grade;
+                obj.City = pupilToUpdate.City;
+                obj.Road = pupilToUpdate.Road;
+                obj.PostalCode = pupilToUpdate.PostalCode;
+                obj.GuardianEmail = pupilToUpdate.GuardianEmail;
+            }
+            return obj;
         }
 
         public bool Delete(string email)
         {
             int rowsAffected = 0;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_pupil_delete";
                 cmd.CommandType = CommandType.StoredProcedure;
