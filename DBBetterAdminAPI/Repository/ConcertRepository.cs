@@ -6,15 +6,17 @@ namespace BetterAdminDbAPI.Repository
     public class ConcertRepository
     {
         private readonly MySqlConnection _con;
+        private List<Concert> _concerts = new();
 
         public ConcertRepository(MySqlConnection connection)
         {
             _con = connection;
+            _concerts = GetAll();
         }
 
         public List<Concert> GetAll()
         {
-            List<Concert> concerts = new List<Concert>();
+            _concerts = new List<Concert>();
             using (_con)
             {
                 _con.Open();
@@ -32,11 +34,11 @@ namespace BetterAdminDbAPI.Repository
                             ConcertLocation = dr["concert_location"].ToString()
 
                         };
-                        concerts.Add(concert);
+                        _concerts.Add(concert);
                     }
                 }
             }
-            return concerts;
+            return _concerts;
         }
 
         public Concert Get(int id)
@@ -64,9 +66,8 @@ namespace BetterAdminDbAPI.Repository
             return concertToReturn;
         }
 
-        public int Create(Concert concertToCreate)
+        public Concert Create(Concert concertToCreate)
         {
-            int concertId;
             using (_con)
             {
                 _con.Open();
@@ -78,14 +79,21 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@end_time", concertToCreate.EndTime);
                 cmd.Parameters.AddWithValue("@concert_location", concertToCreate.ConcertLocation);
 
-                concertId = Convert.ToInt32(cmd.ExecuteScalar());
+                cmd.ExecuteNonQuery();
+
+                if (cmd.LastInsertedId != null)
+                    cmd.Parameters.Add(new MySqlParameter("newId", cmd.LastInsertedId));
+
+                _concerts.Add(concertToCreate);
+                _concerts[_concerts.Count - 1].ConcertId = Convert.ToInt32(cmd.Parameters["@newId"].Value);
+
             }
-            return concertId;
+            return _concerts[_concerts.Count - 1];
         }
 
-        public bool Update(Concert concertToUpdate)
+        public Concert Update(Concert concertToUpdate)
         {
-            int rowsAffected = 0;
+            var obj = _concerts.FirstOrDefault(x => x.ConcertId == concertToUpdate.ConcertId);
             using (_con)
             {
                 _con.Open();
@@ -97,9 +105,17 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@end_time", concertToUpdate.EndTime);
                 cmd.Parameters.AddWithValue("@concert_location", concertToUpdate.ConcertLocation);
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
+
+                if (obj != null)
+                {
+                    obj.ConcertName = concertToUpdate.ConcertName;
+                    obj.ConcertLocation = concertToUpdate.ConcertLocation;
+                    obj.EndTime = concertToUpdate.EndTime;
+                    obj.StartTime = concertToUpdate.StartTime;
+                }
             }
-            return rowsAffected != 0;
+            return obj;
         }
 
         public bool Delete(Concert concertToDelete)

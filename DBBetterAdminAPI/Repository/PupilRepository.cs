@@ -91,34 +91,37 @@ namespace BetterAdminDbAPI.Repository
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    GenderEnum gender;
-                    Enum.TryParse<GenderEnum>(reader["gender"].ToString(), out gender);
-                    Pupil pupil = new Pupil()
+                    if (reader.Read())
                     {
-                        PupilId = Convert.ToInt32(reader["pupil_id"]),
-                        Email = email,
-                        HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
-                        Salt = reader["salt"].ToString(),
-                        FirstName = reader["first_name"].ToString(),
-                        LastName = reader["last_name"].ToString(),
-                        PhoneNo = reader["phone_no"].ToString(),
-                        Gender = gender,
-                        EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
-                        Note = reader["note"].ToString(),
-                        PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
-                        School = reader["school"].ToString(),
-                        Grade = Convert.ToInt32(reader["grade"]),
-                        City = reader["city"].ToString(),
-                        Road = reader["road"].ToString(),
-                        PostalCode = reader["postal_code"].ToString()
-                    };
-                    // Add guardian if GuardianEmail != null
-                    string? guardianEmail = Convert.ToString(reader["guardian_email"]);
-                    if (guardianEmail != "")
-                    {
-                        pupil.Guardian = guardianRepo.Get(guardianEmail);
+                        GenderEnum gender;
+                        Enum.TryParse<GenderEnum>(reader["gender"].ToString(), out gender);
+                        Pupil pupil = new Pupil()
+                        {
+                            PupilId = Convert.ToInt32(reader["pupil_id"]),
+                            Email = email,
+                            HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
+                            Salt = reader["salt"].ToString(),
+                            FirstName = reader["first_name"].ToString(),
+                            LastName = reader["last_name"].ToString(),
+                            PhoneNo = reader["phone_no"].ToString(),
+                            Gender = gender,
+                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
+                            Note = reader["note"].ToString(),
+                            PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
+                            School = reader["school"].ToString(),
+                            Grade = Convert.ToInt32(reader["grade"]),
+                            City = reader["city"].ToString(),
+                            Road = reader["road"].ToString(),
+                            PostalCode = reader["postal_code"].ToString()
+                        };
+                        // Add guardian if GuardianEmail != null
+                        string? guardianEmail = Convert.ToString(reader["guardian_email"]);
+                        if (guardianEmail != "")
+                        {
+                            pupil.Guardian = guardianRepo.Get(guardianEmail);
+                        }
+                        pupilToReturn = pupil;
                     }
-                    pupilToReturn = pupil;
                 }
             }
             return pupilToReturn;
@@ -185,7 +188,7 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("pguardian_email", pupilToCreate.Guardian?.Email);
                 cmd.Parameters["pguardian_email"].Direction = ParameterDirection.Input;
 
-                cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQueryAsync();
             }
             //pupilToReturn = Get(pupilToCreate.Email);
             return pupilToReturn;

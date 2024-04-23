@@ -1,24 +1,28 @@
 ﻿using BetterAdminDbAPI.Model;
 using MySqlConnector;
+using Newtonsoft.Json.Linq;
 
 namespace BetterAdminDbAPI.Repository
 {
     public class WaitListRepository
     {
         private readonly MySqlConnection _con;
+        private List<WaitList> _waitLists = new();
 
         public WaitListRepository(MySqlConnection connection)
         {
             _con = connection;
+            _waitLists = GetAll();
         }
 
         public List<WaitList> GetAll()
         {
-            List<WaitList> waitLists = new List<WaitList>();
+            _waitLists = new List<WaitList>();
+
             using (_con)
             {
                 _con.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT course_id, pupil_id FROM waitlist", _con);
+                MySqlCommand cmd = new MySqlCommand("SELECT course_id, pupil_id, time_entered_queue FROM waitlist", _con);
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
@@ -29,14 +33,38 @@ namespace BetterAdminDbAPI.Repository
                             PupilId = Convert.ToInt32(dr["pupil_id"]),
                             TimeEnteredQueue = Convert.ToDateTime(dr["time_entered_queue"])
                         };
-                        waitLists.Add(waitList);
+                        _waitLists.Add(waitList);
                     }
                 }
             }
-            return waitLists;
+
+            return _waitLists;
         }
 
-        public WaitList Get(int pupilId)
+        public WaitList GetByCourseId(int courseId)
+        {
+            WaitList waitListToReturn = null;
+            using (_con)
+            {
+                _con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT pupil_id, course_id, time_entered_queue FROM waitlist WHERE course_id = @course_id", _con);
+                cmd.Parameters.AddWithValue("@course_id", courseId);
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    WaitList waitList = new WaitList()
+                    {
+                        CourseId = Convert.ToInt32(dr["course_id"]),
+                        PupilId = Convert.ToInt32(dr["pupil_id"]),
+                        TimeEnteredQueue = Convert.ToDateTime(dr["time_entered_queue"])
+
+                    };
+                    waitListToReturn = waitList;
+                }
+            }
+            return waitListToReturn;
+        }
+
+        public WaitList GetByPupilId(int pupilId)
         {
             WaitList waitListToReturn = null;
             using (_con)
@@ -59,9 +87,8 @@ namespace BetterAdminDbAPI.Repository
             return waitListToReturn;
         }
 
-        public bool Create(WaitList waitListToCreate)
+        public WaitList Create(WaitList waitListToCreate)
         {
-            int rowsAffected = 0;
             using (_con)
             {
                 _con.Open();
@@ -72,14 +99,17 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@course_id", waitListToCreate.CourseId);
                 cmd.Parameters.AddWithValue("@time_entered_queue", waitListToCreate.TimeEnteredQueue);
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
+
+                _waitLists.Add(waitListToCreate);
+                
             }
-            return rowsAffected != 0;
+            return _waitLists[_waitLists.Count - 1];
         }
 
-        public bool Update(WaitList waitListToUpdate)
+        public WaitList Update(WaitList waitListToUpdate)
         {
-            int rowsAffected = 0;
+            var obj = _waitLists.FirstOrDefault(x => x.CourseId == waitListToUpdate.CourseId && x.PupilId == waitListToUpdate.PupilId);
             using (_con)
             {
                 _con.Open();
@@ -89,9 +119,11 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@course_id", waitListToUpdate.CourseId);
                 cmd.Parameters.AddWithValue("@start_time", waitListToUpdate.TimeEnteredQueue);
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
+
+                if (obj != null) obj.TimeEnteredQueue = waitListToUpdate.TimeEnteredQueue;
             }
-            return rowsAffected != 0;
+            return obj;
         }
 
         public bool Delete(WaitList waitListToDelete)
