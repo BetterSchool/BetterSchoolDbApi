@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: psychic-surf-420214 # TODO: update Google Cloud project id
-  SERVICE: ${{ secrets.GCR_SERVICE_NAME }} # TODO: update Cloud Run service name
+  SERVICE: ${{ secrets.WIF_SERVICE_NAME }} # TODO: update Cloud Run service name
   REGION: europe-west4 # TODO: update Cloud Run service region
 
 jobs:
