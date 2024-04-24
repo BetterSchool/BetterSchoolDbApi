@@ -28,10 +28,10 @@ namespace BetterAdminDbAPI.Repository
                         Concert concert = new Concert()
                         {
                             ConcertId = Convert.ToInt32(dr["concert_id"]),
-                            ConcertName = dr["concert_name"].ToString(),
+                            ConcertName = dr["concert_name"].ToString()!,
                             StartTime = Convert.ToDateTime(dr["start_time"]),
                             EndTime = Convert.ToDateTime(dr["end_time"]),
-                            ConcertLocation = dr["concert_location"].ToString()
+                            ConcertLocation = dr["concert_location"].ToString()!
 
                         };
                         _concerts.Add(concert);
@@ -43,7 +43,7 @@ namespace BetterAdminDbAPI.Repository
 
         public Concert Get(int id)
         {
-            Concert concertToReturn = null;
+            Concert? concertToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -54,10 +54,10 @@ namespace BetterAdminDbAPI.Repository
                     Concert concert = new Concert()
                     {
                         ConcertId = Convert.ToInt32(dr["concert_id"]),
-                        ConcertName = dr["concert_name"].ToString(),
+                        ConcertName = dr["concert_name"].ToString()!,
                         StartTime = Convert.ToDateTime(dr["start_time"]),
                         EndTime = Convert.ToDateTime(dr["end_time"]),
-                        ConcertLocation = dr["concert_location"].ToString()
+                        ConcertLocation = dr["concert_location"].ToString()!
 
                     };
                     concertToReturn = concert;

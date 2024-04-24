@@ -37,21 +37,21 @@ namespace BetterAdminDbAPI.Repository
                         Pupil pupil = new Pupil()
                         {
                             PupilId = Convert.ToInt32(reader["pupil_id"]),
-                            Email = reader["email"].ToString(),
-                            HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
-                            Salt = reader["salt"].ToString(),
-                            FirstName = reader["first_name"].ToString(),
-                            LastName = reader["last_name"].ToString(),
-                            PhoneNo = reader["phone_no"].ToString(),
+                            Email = reader["email"].ToString()!,
+                            HashedSaltedPassword = reader["hashed_salted_password"].ToString()!,
+                            Salt = reader["salt"].ToString()!,
+                            FirstName = reader["first_name"].ToString()!,
+                            LastName = reader["last_name"].ToString()!,
+                            PhoneNo = reader["phone_no"].ToString()!,
                             Gender = gender,
-                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
+                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()!),
                             Note = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString(),
-                            PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
-                            School = reader["school"].ToString(),
+                            PhotoPermission = bool.Parse(reader["photo_permission"].ToString()!),
+                            School = reader["school"].ToString()!,
                             Grade = Convert.ToInt32(reader["grade"]),
-                            City = reader["city"].ToString(),
-                            Road = reader["road"].ToString(),
-                            PostalCode = reader["postal_code"].ToString(),
+                            City = reader["city"].ToString()!,
+                            Road = reader["road"].ToString()!,
+                            PostalCode = reader["postal_code"].ToString()!,
                             GuardianEmail = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString()
                         };
                         _pupils.Add(pupil);
@@ -61,9 +61,9 @@ namespace BetterAdminDbAPI.Repository
             return _pupils;
         }
 
-        public Pupil Get(string email)
+        public Pupil? Get(string email)
         {
-            Pupil pupilToReturn = null;
+            Pupil? pupilToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -87,20 +87,20 @@ namespace BetterAdminDbAPI.Repository
                         {
                             PupilId = Convert.ToInt32(reader["pupil_id"]),
                             Email = email,
-                            HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
-                            Salt = reader["salt"].ToString(),
-                            FirstName = reader["first_name"].ToString(),
-                            LastName = reader["last_name"].ToString(),
-                            PhoneNo = reader["phone_no"].ToString(),
+                            HashedSaltedPassword = reader["hashed_salted_password"].ToString()!,
+                            Salt = reader["salt"].ToString()!,
+                            FirstName = reader["first_name"].ToString()!,
+                            LastName = reader["last_name"].ToString()!,
+                            PhoneNo = reader["phone_no"].ToString()!,
                             Gender = gender,
-                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()),
+                            EnrollmentDate = DateTime.Parse(reader["enrollment_date"].ToString()!),
                             Note = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString(),
-                            PhotoPermission = bool.Parse(reader["photo_permission"].ToString()),
-                            School = reader["school"].ToString(),
+                            PhotoPermission = bool.Parse(reader["photo_permission"].ToString()!),
+                            School = reader["school"].ToString()!,
                             Grade = Convert.ToInt32(reader["grade"]),
-                            City = reader["city"].ToString(),
-                            Road = reader["road"].ToString(),
-                            PostalCode = reader["postal_code"].ToString(),
+                            City = reader["city"].ToString()!,
+                            Road = reader["road"].ToString()!,
+                            PostalCode = reader["postal_code"].ToString()!,
                             GuardianEmail = reader["guardian_email"].ToString() == "" ? null : reader["guardian_email"].ToString()
                         };
                         pupilToReturn = pupil;
@@ -148,9 +148,9 @@ namespace BetterAdminDbAPI.Repository
             return _pupils[_pupils.Count - 1];
         }
 
-        public Pupil Update(Pupil pupilToUpdate)
+        public Pupil? Update(Pupil pupilToUpdate)
         {
-            var obj = _pupils.FirstOrDefault(x => x.Email == pupilToUpdate.Email);
+            Pupil? obj = _pupils.FirstOrDefault(x => x.Email == pupilToUpdate.Email);
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();

@@ -43,7 +43,7 @@ namespace BetterAdminDbAPI.Repository
 
         public WaitList GetByCourseId(int courseId)
         {
-            WaitList waitListToReturn = null;
+            WaitList? waitListToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -66,7 +66,7 @@ namespace BetterAdminDbAPI.Repository
 
         public WaitList GetByPupilId(int pupilId)
         {
-            WaitList waitListToReturn = null;
+            WaitList? waitListToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();

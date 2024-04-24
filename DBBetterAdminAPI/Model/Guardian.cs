@@ -2,7 +2,7 @@
 {
     public class Guardian
     {
-        public int GuardianId { get; set; }
+        public int? GuardianId { get; set; }
         public string HashedSaltedPassword { get; set; }
         public string Salt { get; set; }
         public string FirstName { get; set; }

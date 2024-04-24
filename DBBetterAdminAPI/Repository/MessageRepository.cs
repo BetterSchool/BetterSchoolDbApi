@@ -29,11 +29,11 @@ namespace BetterAdminDbAPI.Repository
                         Message message = new Message()
                         {
                             MessageId = Convert.ToInt32(dr["message_id"]),
-                            Content = dr["content"].ToString(),
+                            Content = dr["content"].ToString()!,
                             Attachment = (byte[])dr["attachment"],
                             TimeSent = Convert.ToDateTime(dr["time_sent"]),
-                            SenderEmail = dr["sender_email"].ToString(),
-                            ReceiverEmail = dr["receiver_email"].ToString()
+                            SenderEmail = dr["sender_email"].ToString()!,
+                            ReceiverEmail = dr["receiver_email"].ToString()!
 
                         };
                         _messages.Add(message);
@@ -45,7 +45,7 @@ namespace BetterAdminDbAPI.Repository
 
         public Message GetById(int id)
         {
-            Message messageToReturn = null;
+            Message? messageToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -56,11 +56,11 @@ namespace BetterAdminDbAPI.Repository
                     Message message = new Message()
                     {
                         MessageId = Convert.ToInt32(dr["message_id"]),
-                        Content = dr["content"].ToString(),
+                        Content = dr["content"].ToString()!,
                         Attachment = (byte[])dr["attachment"],
                         TimeSent = Convert.ToDateTime(dr["time_sent"]),
-                        SenderEmail = dr["sender_email"].ToString(),
-                        ReceiverEmail = dr["receiver_email"].ToString()
+                        SenderEmail = dr["sender_email"].ToString()!,
+                        ReceiverEmail = dr["receiver_email"].ToString()!
 
                     };
                     messageToReturn = message;
@@ -84,11 +84,11 @@ namespace BetterAdminDbAPI.Repository
                         Message message = new Message()
                         {
                             MessageId = Convert.ToInt32(dr["message_id"]),
-                            Content = dr["content"].ToString(),
+                            Content = dr["content"].ToString()!,
                             Attachment = (byte[])dr["attachment"],
                             TimeSent = Convert.ToDateTime(dr["time_sent"]),
-                            SenderEmail = dr["sender_email"].ToString(),
-                            ReceiverEmail = dr["receiver_email"].ToString()
+                            SenderEmail = dr["sender_email"].ToString()!,
+                            ReceiverEmail = dr["receiver_email"].ToString()!
 
                         };
                         returnList.Add(message);
@@ -113,11 +113,11 @@ namespace BetterAdminDbAPI.Repository
                         Message message = new Message()
                         {
                             MessageId = Convert.ToInt32(dr["message_id"]),
-                            Content = dr["content"].ToString(),
+                            Content = dr["content"].ToString()!,
                             Attachment = (byte[])dr["attachment"],
                             TimeSent = Convert.ToDateTime(dr["time_sent"]),
-                            SenderEmail = dr["sender_email"].ToString(),
-                            ReceiverEmail = dr["receiver_email"].ToString()
+                            SenderEmail = dr["sender_email"].ToString()!,
+                            ReceiverEmail = dr["receiver_email"].ToString()!
 
                         };
                         returnList.Add(message);
@@ -152,9 +152,9 @@ namespace BetterAdminDbAPI.Repository
             return _messages[_messages.Count - 1];
         }
 
-        public Message Update(Message messageToUpdate)
+        public Message? Update(Message messageToUpdate)
         {
-            var obj = _messages.FirstOrDefault(x => x.MessageId == messageToUpdate.MessageId);
+            Message? obj = _messages.FirstOrDefault(x => x.MessageId == messageToUpdate.MessageId);
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
