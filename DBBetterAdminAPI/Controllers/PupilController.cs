@@ -9,6 +9,8 @@ using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
 using FromBodyAttribute = Microsoft.AspNetCore.Mvc.FromBodyAttribute;
 using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;
+using HttpDeleteAttribute = Microsoft.AspNetCore.Mvc.HttpDeleteAttribute;
+using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace BetterAdminDbAPI.Controllers
 {
@@ -30,7 +32,7 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // GET: api/<PupilController>
-        [HttpGet("GetPupils")]
+        [HttpGet]
         public List<Pupil> Get()
         {
             List<Pupil> pupils = repo.GetAll();
@@ -41,8 +43,8 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // GET api/<PupilController>/5
-        [HttpGet("GetPupilByEmail")]
-        public Pupil GetPupilByEmail([FromUri]string email)
+        [HttpGet("GetByEmail")]
+        public Pupil GetByEmail([FromUri]string email)
         {
             Pupil? pupil = repo.Get(email);
             if (pupil == null){
@@ -73,20 +75,24 @@ namespace BetterAdminDbAPI.Controllers
         }
 
         // PUT api/<PupilController>/5
-        [HttpPut("UpdatePupil")]
-        public HttpStatusCode UpdatePupil([FromBody] Pupil pupilChanges)
+        [HttpPut]
+        public Pupil UpdatePupil([FromBody] Pupil pupilChanges)
         {
-            var result = repo.Update(pupilChanges);
+            Pupil? result = repo.Get(pupilChanges.Email);
+            if (result == null)
+                throw new HttpResponseException(HttpStatusCode.NotFound);
 
-            if (result == null){
+            Pupil? updateResult = repo.Update(pupilChanges);
+
+            if (updateResult == null){
                 throw new HttpResponseException(HttpStatusCode.NotFound);
             }
 
-            return HttpStatusCode.OK;
+            return updateResult;
         }
 
         // DELETE api/<PupilController>/5
-        [HttpPut("DeletePupil")]
+        [HttpDelete]
         public HttpStatusCode DeletePupil([FromBody]Pupil pupil)
         {
             var result = repo.Delete(pupil);
