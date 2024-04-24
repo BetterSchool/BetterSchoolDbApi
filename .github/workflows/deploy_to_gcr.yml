@@ -5,9 +5,9 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_ID: psychic-surf-420214 # TODO: update Google Cloud project id
-  SERVICE: ${{ secrets.GCR_SERVICE_NAME }} # TODO: update Cloud Run service name
-  REGION: europe-west4 # TODO: update Cloud Run service region
+  PROJECT_ID: psychic-surf-420214
+  SERVICE: ${{ secrets.GCR_SERVICE_NAME }}
+  REGION: europe-west4 
 
 jobs:
   deploy:
@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - run: ls
 
       - name: Google Auth
         id: auth
@@ -34,7 +35,6 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          # NOTE: If required, update to the appropriate source folder
           source: ./DBBetterAdminAPI
 
       # If required, use the Cloud Run url output in later steps
