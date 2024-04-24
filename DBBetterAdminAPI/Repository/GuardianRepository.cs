@@ -30,15 +30,15 @@ namespace BetterAdminDbAPI.Repository
                         Guardian guardian = new Guardian()
                         {
                             GuardianId = Convert.ToInt32(reader["guardian_id"]),
-                            Email = reader["email"].ToString(),
-                            HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
-                            Salt = reader["salt"].ToString(),
-                            FirstName = reader["first_name"].ToString(),
-                            LastName = reader["last_name"].ToString(),
-                            PhoneNo = reader["phone_no"].ToString(),
-                            City = reader["city"].ToString(),
-                            Road = reader["road"].ToString(),
-                            PostalCode = reader["postal_code"].ToString(),
+                            Email = reader["email"].ToString()!,
+                            HashedSaltedPassword = reader["hashed_salted_password"].ToString()!,
+                            Salt = reader["salt"].ToString()!,
+                            FirstName = reader["first_name"].ToString()!,
+                            LastName = reader["last_name"].ToString()!,
+                            PhoneNo = reader["phone_no"].ToString()!,
+                            City = reader["city"].ToString()!,
+                            Road = reader["road"].ToString()!,
+                            PostalCode = reader["postal_code"].ToString()!,
                         };
                         _guardians.Add(guardian);
                     }
@@ -49,7 +49,7 @@ namespace BetterAdminDbAPI.Repository
 
         public Guardian Get(string email)
         {
-            Guardian guardianToReturn = null;
+            Guardian? guardianToReturn = null;
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -68,14 +68,14 @@ namespace BetterAdminDbAPI.Repository
                     Guardian guardian = new Guardian()
                     {
                         GuardianId = Convert.ToInt32(reader["guardian_id"]),
-                        Email = reader["email"].ToString(),
-                        HashedSaltedPassword = reader["hashed_salted_password"].ToString(),
-                        Salt = reader["salt"].ToString(),
-                        FirstName = reader["first_name"].ToString(),
-                        LastName = reader["last_name"].ToString(),
-                        PhoneNo = reader["phone_no"].ToString(),
-                        City = reader["city"].ToString(),
-                        Road = reader["road"].ToString()
+                        Email = reader["email"].ToString()!,
+                        HashedSaltedPassword = reader["hashed_salted_password"].ToString()!,
+                        Salt = reader["salt"].ToString()!,
+                        FirstName = reader["first_name"].ToString()!,
+                        LastName = reader["last_name"].ToString()!,
+                        PhoneNo = reader["phone_no"].ToString()!,
+                        City = reader["city"].ToString()!,
+                        Road = reader["road"].ToString()!
                     };
                     guardianToReturn = guardian;
                 }
@@ -90,7 +90,7 @@ namespace BetterAdminDbAPI.Repository
                 con.Open();
                 MySqlCommand cmd = new MySqlCommand("INSERT INTO credentials (email, hashed_salted_password, salt)" +
                     "VALUES(@email, @hashed_salted_password, @salt);" +
-                    "INSERT INTO pupil (first_name, last_name, phone_no, city, road, postal_code, email)" +
+                    "INSERT INTO guardian (first_name, last_name, phone_no, city, road, postal_code, email)" +
                     "VALUES(@first_name, @last_name, @phone_no, @city, @road, @postal_code, @email)", con);
 
                 cmd.Parameters.AddWithValue("@email", guardianToCreate.Email);

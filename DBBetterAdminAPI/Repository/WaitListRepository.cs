@@ -41,9 +41,9 @@ namespace BetterAdminDbAPI.Repository
             return _waitLists;
         }
 
-        public WaitList GetByCourseId(int courseId)
+        public List<WaitList> GetByCourseId(int courseId)
         {
-            WaitList? waitListToReturn = null;
+            List<WaitList> resultList = new List<WaitList>();
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -51,22 +51,24 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@course_id", courseId);
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    WaitList waitList = new WaitList()
+                    while (dr.Read())
                     {
-                        CourseId = Convert.ToInt32(dr["course_id"]),
-                        PupilId = Convert.ToInt32(dr["pupil_id"]),
-                        TimeEnteredQueue = Convert.ToDateTime(dr["time_entered_queue"])
-
-                    };
-                    waitListToReturn = waitList;
+                        WaitList waitList = new WaitList()
+                        {
+                            CourseId = Convert.ToInt32(dr["course_id"]),
+                            PupilId = Convert.ToInt32(dr["pupil_id"]),
+                            TimeEnteredQueue = Convert.ToDateTime(dr["time_entered_queue"])
+                        };
+                        resultList.Add(waitList);
+                    }
                 }
             }
-            return waitListToReturn;
+            return resultList;
         }
 
-        public WaitList GetByPupilId(int pupilId)
+        public List<WaitList> GetByPupilId(int pupilId)
         {
-            WaitList? waitListToReturn = null;
+            List<WaitList> resultList = new List<WaitList>();
             using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
                 con.Open();
@@ -79,12 +81,11 @@ namespace BetterAdminDbAPI.Repository
                         CourseId = Convert.ToInt32(dr["course_id"]),
                         PupilId = Convert.ToInt32(dr["pupil_id"]),
                         TimeEnteredQueue = Convert.ToDateTime(dr["time_entered_queue"])
-
                     };
-                    waitListToReturn = waitList;
+                    resultList.Add(waitList);
                 }
             }
-            return waitListToReturn;
+            return resultList;
         }
 
         public WaitList Create(WaitList waitListToCreate)
