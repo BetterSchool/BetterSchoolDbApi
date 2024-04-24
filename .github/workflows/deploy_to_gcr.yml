@@ -5,34 +5,37 @@ on:
     branches: [ "main" ]
 
 env:
-  PROJECT_ID: psychic-surf-420214 # TODO: update Google Cloud project id
-  SERVICE: ${{ secrets.GCR_SERVICE_NAME }} # TODO: update Cloud Run service name
-  REGION: europe-west4 # TODO: update Cloud Run service region
+  PROJECT_ID: psychic-surf-420214
+  SERVICE: ${{ secrets.GCR_SERVICE_NAME }}
+  REGION: europe-west4 
 
 jobs:
-  build-and-push-to-gcr:
-    runs-on: ubuntu-latest
+  deploy:
+    # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
       contents: 'read'
       id-token: 'write'
-    steps:  
-    
-      - uses: actions/checkout@v3
-      - name: Authenticate to Google Cloud
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Google Auth
         id: auth
-        uses: google-github-actions/auth@v2
+        uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-          
-      - uses: RafikFarhad/push-to-gcr-github-action@v5-rc1
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v1
         with:
-          registry: gcr.io
-          project_id: ${{ env.PROJECT_ID }}
-          image_name: backend
-          image_tag: latest,v1
-          dockerfile: ./DBBetterAdminAPI/Dockerfile
-          context: ./DBBetterAdminAPI
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          # NOTE: If required, update to the appropriate source folder
+          source: ./PlatformService/PlatformService
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
