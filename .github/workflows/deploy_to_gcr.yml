@@ -10,32 +10,29 @@ env:
   REGION: europe-west4 # TODO: update Cloud Run service region
 
 jobs:
-  deploy:
-    # Add 'id-token' with the intended permissions for workload identity federation
+  build-and-push-to-gcr:
+    runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Google Auth
+    steps:  
+    
+      - uses: actions/checkout@v3
+      - name: Authenticate to Google Cloud
         id: auth
-        uses: 'google-github-actions/auth@v1'
+        uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
-
-      - name: Deploy to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v1
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          
+      - uses: RafikFarhad/push-to-gcr-github-action@v5-rc1
         with:
-          service: ${{ env.SERVICE }}
-          region: ${{ env.REGION }}
-          # NOTE: If required, update to the appropriate source folder
-          source: ./DBBetterAdminAPI
+          registry: gcr.io
+          project_id: ${{ env.PROJECT_ID }}
+          image_name: backend
+          image_tag: latest,v1
+          dockerfile: ./DBBetterAdminAPI/Dockerfile
+          context: ./DBBetterAdminAPI
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
