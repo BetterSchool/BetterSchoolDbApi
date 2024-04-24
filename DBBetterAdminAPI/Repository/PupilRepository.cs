@@ -200,8 +200,8 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("pcity", pupilToUpdate.City);
                 cmd.Parameters["pcity"].Direction = ParameterDirection.Input;
 
-                cmd.Parameters.AddWithValue("road", pupilToUpdate.Road);
-                cmd.Parameters["road"].Direction = ParameterDirection.Input;
+                cmd.Parameters.AddWithValue("proad", pupilToUpdate.Road);
+                cmd.Parameters["proad"].Direction = ParameterDirection.Input;
 
                 cmd.Parameters.AddWithValue("ppostal_code", pupilToUpdate.PostalCode);
                 cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
