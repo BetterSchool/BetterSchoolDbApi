@@ -6,7 +6,7 @@ namespace BetterAdminDbAPI.Model
 {
     public class Pupil
     {
-        public int PupilId { get; set; }
+        public int? PupilId { get; set; }
         public string Email { get; set; }
         public string HashedSaltedPassword { get; set; }
         public string Salt { get; set; }
@@ -22,6 +22,6 @@ namespace BetterAdminDbAPI.Model
         public string City { get; set; }
         public string Road { get; set; }
         public string PostalCode { get; set; }
-        public Guardian? Guardian { get; set; }
+        public string? GuardianEmail { get; set; }
     }
 }

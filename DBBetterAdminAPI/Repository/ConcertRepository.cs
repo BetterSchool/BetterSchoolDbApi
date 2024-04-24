@@ -5,20 +5,22 @@ namespace BetterAdminDbAPI.Repository
 {
     public class ConcertRepository
     {
-        private readonly MySqlConnection _con;
+        private readonly string _connectionString;
+        private List<Concert> _concerts = new();
 
-        public ConcertRepository(MySqlConnection connection)
+        public ConcertRepository(string connectionString)
         {
-            _con = connection;
+            _connectionString = connectionString;
+            _concerts = GetAll();
         }
 
         public List<Concert> GetAll()
         {
-            List<Concert> concerts = new List<Concert>();
-            using (_con)
+            _concerts = new List<Concert>();
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT concert_id, concert_name, start_time, end_time, concert_location FROM concert", _con);
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT concert_id, concert_name, start_time, end_time, concert_location FROM concert", con);
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
@@ -26,36 +28,36 @@ namespace BetterAdminDbAPI.Repository
                         Concert concert = new Concert()
                         {
                             ConcertId = Convert.ToInt32(dr["concert_id"]),
-                            ConcertName = dr["concert_name"].ToString(),
+                            ConcertName = dr["concert_name"].ToString()!,
                             StartTime = Convert.ToDateTime(dr["start_time"]),
                             EndTime = Convert.ToDateTime(dr["end_time"]),
-                            ConcertLocation = dr["concert_location"].ToString()
+                            ConcertLocation = dr["concert_location"].ToString()!
 
                         };
-                        concerts.Add(concert);
+                        _concerts.Add(concert);
                     }
                 }
             }
-            return concerts;
+            return _concerts;
         }
 
         public Concert Get(int id)
         {
-            Concert concertToReturn = null;
-            using (_con)
+            Concert? concertToReturn = null;
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT concert_id, concert_name, start_time, end_time, concert_location FROM concert WHERE concert_id = @id", _con);
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT concert_id, concert_name, start_time, end_time, concert_location FROM concert WHERE concert_id = @id", con);
                 cmd.Parameters.AddWithValue("@id", id);
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     Concert concert = new Concert()
                     {
                         ConcertId = Convert.ToInt32(dr["concert_id"]),
-                        ConcertName = dr["concert_name"].ToString(),
+                        ConcertName = dr["concert_name"].ToString()!,
                         StartTime = Convert.ToDateTime(dr["start_time"]),
                         EndTime = Convert.ToDateTime(dr["end_time"]),
-                        ConcertLocation = dr["concert_location"].ToString()
+                        ConcertLocation = dr["concert_location"].ToString()!
 
                     };
                     concertToReturn = concert;
@@ -64,32 +66,38 @@ namespace BetterAdminDbAPI.Repository
             return concertToReturn;
         }
 
-        public int Create(Concert concertToCreate)
+        public Concert Create(Concert concertToCreate)
         {
-            int concertId;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
                 MySqlCommand cmd = new MySqlCommand("INSERT INTO concert (concert_name, start_time, end_time, concert_location)" +
-                    "VALUES(@concert_name, @start_time, @end_time, @concert_location)", _con);
+                    "VALUES(@concert_name, @start_time, @end_time, @concert_location)", con);
 
                 cmd.Parameters.AddWithValue("@concert_name", concertToCreate.ConcertName);
                 cmd.Parameters.AddWithValue("@start_time", concertToCreate.StartTime);
                 cmd.Parameters.AddWithValue("@end_time", concertToCreate.EndTime);
                 cmd.Parameters.AddWithValue("@concert_location", concertToCreate.ConcertLocation);
 
-                concertId = Convert.ToInt32(cmd.ExecuteScalar());
+                cmd.ExecuteNonQuery();
+
+                if (cmd.LastInsertedId != null)
+                    cmd.Parameters.Add(new MySqlParameter("newId", cmd.LastInsertedId));
+
+                _concerts.Add(concertToCreate);
+                _concerts[_concerts.Count - 1].ConcertId = Convert.ToInt32(cmd.Parameters["@newId"].Value);
+
             }
-            return concertId;
+            return _concerts[_concerts.Count - 1];
         }
 
-        public bool Update(Concert concertToUpdate)
+        public Concert Update(Concert concertToUpdate)
         {
-            int rowsAffected = 0;
-            using (_con)
+            var obj = _concerts.FirstOrDefault(x => x.ConcertId == concertToUpdate.ConcertId);
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-                MySqlCommand cmd = new MySqlCommand("UPDATE concert SET concert_name = @concert_name, start_time = @start_time, end_time = @end_time, concert_location = @concert_location WHERE concert_id = @id", _con);
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("UPDATE concert SET concert_name = @concert_name, start_time = @start_time, end_time = @end_time, concert_location = @concert_location WHERE concert_id = @id", con);
 
                 cmd.Parameters.AddWithValue("@id", concertToUpdate.ConcertId);
                 cmd.Parameters.AddWithValue("@concert_name", concertToUpdate.ConcertName);
@@ -97,18 +105,26 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("@end_time", concertToUpdate.EndTime);
                 cmd.Parameters.AddWithValue("@concert_location", concertToUpdate.ConcertLocation);
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
+
+                if (obj != null)
+                {
+                    obj.ConcertName = concertToUpdate.ConcertName;
+                    obj.ConcertLocation = concertToUpdate.ConcertLocation;
+                    obj.EndTime = concertToUpdate.EndTime;
+                    obj.StartTime = concertToUpdate.StartTime;
+                }
             }
-            return rowsAffected != 0;
+            return obj;
         }
 
         public bool Delete(Concert concertToDelete)
         {
             int rowsAffected = 0;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-                MySqlCommand cmd = new MySqlCommand("DELETE FROM concert WHERE concert_id = @id", _con);
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("DELETE FROM concert WHERE concert_id = @id", con);
 
                 cmd.Parameters.AddWithValue("@id", concertToDelete.ConcertId);
 

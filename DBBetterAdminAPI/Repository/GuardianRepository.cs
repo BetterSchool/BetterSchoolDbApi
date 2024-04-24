@@ -7,26 +7,22 @@ namespace BetterAdminDbAPI.Repository
 {
     public class GuardianRepository
     {
-        private readonly MySqlConnection _con;
+        private readonly string _connectionString;
+        private List<Guardian> _guardians = new();
 
-        public GuardianRepository(MySqlConnection connection)
+        public GuardianRepository(string connectionString)
         {
-            _con = connection;
+            _connectionString = connectionString;
+            _guardians = GetAll();
         }
 
         public List<Guardian> GetAll()
         {
-            List<Guardian> guardiansToReturn = new List<Guardian>();
-            using (_con)
+            _guardians.Clear();
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
-
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
-
-                cmd.CommandText = "usp_guardian_getall";
-                cmd.CommandType = CommandType.StoredProcedure;
-
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT email, hashed_salted_password, salt, first_name, last_name, phone_no, city, road, postal_code, guardian_id FROM guardian_credentials", con);
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -41,24 +37,25 @@ namespace BetterAdminDbAPI.Repository
                             LastName = reader["last_name"].ToString(),
                             PhoneNo = reader["phone_no"].ToString(),
                             City = reader["city"].ToString(),
-                            Road = reader["road"].ToString()
+                            Road = reader["road"].ToString(),
+                            PostalCode = reader["postal_code"].ToString(),
                         };
-                        guardiansToReturn.Add(guardian);
+                        _guardians.Add(guardian);
                     }
                 }
             }
-            return guardiansToReturn;
+            return _guardians;
         }
 
         public Guardian Get(string email)
         {
             Guardian guardianToReturn = null;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_guardian_get";
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -88,61 +85,45 @@ namespace BetterAdminDbAPI.Repository
 
         public Guardian Create(Guardian guardianToCreate)
         {
-            Guardian guardianToReturn = new Guardian();
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
+                MySqlCommand cmd = new MySqlCommand("INSERT INTO credentials (email, hashed_salted_password, salt)" +
+                    "VALUES(@email, @hashed_salted_password, @salt);" +
+                    "INSERT INTO pupil (first_name, last_name, phone_no, city, road, postal_code, email)" +
+                    "VALUES(@first_name, @last_name, @phone_no, @city, @road, @postal_code, @email)", con);
 
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
-
-                cmd.CommandText = "usp_guardian_insert";
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("pemail", guardianToCreate.Email);
-                cmd.Parameters["pemail"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("phashed_salted_password", guardianToCreate.HashedSaltedPassword);
-                cmd.Parameters["phashed_salted_password"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("psalt", guardianToCreate.Salt);
-                cmd.Parameters["psalt"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pfirst_name", guardianToCreate.FirstName);
-                cmd.Parameters["pfirst_name"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("plast_name", guardianToCreate.LastName);
-                cmd.Parameters["plast_name"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pphone_no", guardianToCreate.PhoneNo);
-                cmd.Parameters["pphone_no"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("pcity", guardianToCreate.City);
-                cmd.Parameters["pcity"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("road", guardianToCreate.Road);
-                cmd.Parameters["road"].Direction = ParameterDirection.Input;
-
-                cmd.Parameters.AddWithValue("ppostal_code", guardianToCreate.PostalCode);
-                cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
+                cmd.Parameters.AddWithValue("@email", guardianToCreate.Email);
+                cmd.Parameters.AddWithValue("@hashed_salted_password", guardianToCreate.HashedSaltedPassword);
+                cmd.Parameters.AddWithValue("@salt", guardianToCreate.Salt);
+                cmd.Parameters.AddWithValue("@first_name", guardianToCreate.FirstName);
+                cmd.Parameters.AddWithValue("@last_name", guardianToCreate.LastName);
+                cmd.Parameters.AddWithValue("@phone_no", guardianToCreate.PhoneNo);
+                cmd.Parameters.AddWithValue("@city", guardianToCreate.City);
+                cmd.Parameters.AddWithValue("@road", guardianToCreate.Road);
+                cmd.Parameters.AddWithValue("@postal_code", guardianToCreate.PostalCode);
 
                 cmd.ExecuteNonQuery();
 
-                guardianToReturn = Get(guardianToCreate.Email);
-            }
+                if (cmd.LastInsertedId != null)
+                    cmd.Parameters.Add(new MySqlParameter("newId", cmd.LastInsertedId));
 
-            return guardianToReturn;
+                _guardians.Add(guardianToCreate);
+                _guardians[_guardians.Count - 1].GuardianId = Convert.ToInt32(cmd.Parameters["@newId"].Value);
+
+            }
+            return _guardians[_guardians.Count - 1];
         }
 
-        public bool Update(Guardian guardianToUpdate)
+        public Guardian Update(Guardian guardianToUpdate)
         {
-            int rowsAffected = 0;
-            using (_con)
+            var obj = _guardians.FirstOrDefault(x => x.Email ==  guardianToUpdate.Email);
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_guardian_update";
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -174,20 +155,31 @@ namespace BetterAdminDbAPI.Repository
                 cmd.Parameters.AddWithValue("ppostal_code", guardianToUpdate.PostalCode);
                 cmd.Parameters["ppostal_code"].Direction = ParameterDirection.Input;
 
-                rowsAffected = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
-            return rowsAffected != 0;
+            if (obj != null)
+            {
+                obj.HashedSaltedPassword = guardianToUpdate.HashedSaltedPassword;
+                obj.Salt = guardianToUpdate.Salt;
+                obj.FirstName = guardianToUpdate.FirstName;
+                obj.LastName = guardianToUpdate.LastName;
+                obj.PhoneNo = guardianToUpdate.PhoneNo;
+                obj.City = guardianToUpdate.City;
+                obj.Road = guardianToUpdate.Road;
+                obj.PostalCode = guardianToUpdate.PostalCode;
+            }
+            return obj;
         }
 
         public bool Delete(Guardian guardianToDelete)
         {
             int rowsAffected = 0;
-            using (_con)
+            using (MySqlConnection con = new MySqlConnection(_connectionString))
             {
-                _con.Open();
+                con.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
-                cmd.Connection = _con;
+                cmd.Connection = con;
 
                 cmd.CommandText = "usp_guardian_delete";
                 cmd.CommandType = CommandType.StoredProcedure;
