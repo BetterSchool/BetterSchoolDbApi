@@ -20,13 +20,13 @@ namespace BetterAdminDbAPI.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
-        PupilRepository repo;
+        PupilRepository _repo;
 
         public PupilController(IConfiguration configuration)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("MyDBConnection");
-            repo = new PupilRepository(_connectionString);
+            _repo = new PupilRepository(_connectionString);
         }
 
         // GET: api/<PupilController>
