@@ -14,7 +14,8 @@ FROM build AS publish
 RUN dotnet publish "BetterAdminDbAPI.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=https://+:8080
+ENV PORT=8080
 WORKDIR /app
 COPY --from=publish /app/publish .
 
