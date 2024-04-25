@@ -18,4 +18,6 @@ COPY --from=publish /app/publish .
 
 EXPOSE 8080
 
+HOST 0.0.0.0
+
 ENTRYPOINT ["dotnet", "BetterAdminDbAPI.dll"]
